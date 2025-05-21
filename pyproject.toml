@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "src"
 version = "0.0.0"
-description = "Hello World"
+description = "Journal Of Open Research Software (JORS) Dataset Generator"
 license = "GNU Affero"
 authors = ["Nicholas M. Synovic <nicholas.synovic@gmail.com>"]
 readme = "README.md"
 homepage = "https://github.com/NicholasSynovic/template_python"
 repository = "https://github.com/NicholasSynovic/template_python"
-keywords = ["Template"]
+keywords = ["dataset", "database"]
 classifiers = ["Development Status :: 1 - Planning"]
 
 [tool.poetry.dependencies]
@@ -19,9 +19,6 @@ beautifulsoup4 = "^4.13.3"
 lxml = "^5.3.2"
 pandas = "^2.2.3"
 sqlalchemy = "^2.0.40"
-playwright = "^1.52.0"
-selenium = "^4.32.0"
-webdriver-manager = "^4.0.2"
 
 
 [build-system]
