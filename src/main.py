@@ -10,7 +10,9 @@ from progress.bar import Bar
 
 from src.db import DB
 
-ARTICLES_URL_TEMPLATE = "https://openresearchsoftware.metajnl.com/articles?items=100&page={}"
+ARTICLES_URL_TEMPLATE = (
+    "https://openresearchsoftware.metajnl.com/articles?items=100&page={}"
+)
 
 
 def download_listing_pages(total_pages: int = 4) -> DataFrame:
@@ -24,7 +26,9 @@ def download_listing_pages(total_pages: int = 4) -> DataFrame:
         url = ARTICLES_URL_TEMPLATE.format(page)
         print(f"📄 Fetching listing page {page}: {url}")
         try:
-            response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30)
+            response = requests.get(
+                url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30
+            )
             if response.status_code == 200:
                 data["url"].append(url)
                 data["html"].append(response.text)
@@ -72,7 +76,9 @@ def download_article_pages(urls_with_pages: List[Tuple[str, int]]) -> DataFrame:
     def fetch(index: int, url: str, page: int) -> Tuple[str, bytes | None, int]:
         try:
             print(f"📄 Fetching {index + 1}/{len(urls_with_pages)}: {url}")
-            response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30)
+            response = requests.get(
+                url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30
+            )
             if response.status_code == 200:
                 return url, response.content, page
             else:
@@ -82,7 +88,10 @@ def download_article_pages(urls_with_pages: List[Tuple[str, int]]) -> DataFrame:
             return url, None, page
 
     with ThreadPoolExecutor(max_workers=20) as executor:
-        futures = [executor.submit(fetch, i, url, page) for i, (url, page) in enumerate(urls_with_pages)]
+        futures = [
+            executor.submit(fetch, i, url, page)
+            for i, (url, page) in enumerate(urls_with_pages)
+        ]
         for future in as_completed(futures):
             url, content, page = future.result()
             if content:
@@ -109,8 +118,12 @@ def extract_metadata(df: DataFrame) -> DataFrame:
 
                 author_tags = soup.find_all("meta", attrs={"name": "dc.creator"})
                 if not author_tags:
-                    author_tags = soup.find_all("meta", attrs={"name": "citation_author"})
-                authors = "; ".join(tag["content"].strip() for tag in author_tags if tag.get("content"))
+                    author_tags = soup.find_all(
+                        "meta", attrs={"name": "citation_author"}
+                    )
+                authors = "; ".join(
+                    tag["content"].strip() for tag in author_tags if tag.get("content")
+                )
 
                 pub_date = ""
                 for tag in soup.find_all(string=True):
@@ -120,7 +133,10 @@ def extract_metadata(df: DataFrame) -> DataFrame:
                         break
 
                 abstract = ""
-                abstract_header = soup.find(lambda tag: tag.name in ["h2", "strong", "b"] and "abstract" in tag.text.lower())
+                abstract_header = soup.find(
+                    lambda tag: tag.name in ["h2", "strong", "b"]
+                    and "abstract" in tag.text.lower()
+                )
                 if abstract_header:
                     next_elem = abstract_header.find_next()
                     while next_elem and next_elem.name not in ["p", "div"]:
@@ -128,13 +144,15 @@ def extract_metadata(df: DataFrame) -> DataFrame:
                     if next_elem:
                         abstract = next_elem.text.strip()
 
-                data.append({
-                    "url": url,
-                    "title": title,
-                    "abstract": abstract,
-                    "publication_date": pub_date,
-                    "authors": authors,
-                })
+                data.append(
+                    {
+                        "url": url,
+                        "title": title,
+                        "abstract": abstract,
+                        "publication_date": pub_date,
+                        "authors": authors,
+                    }
+                )
 
             except Exception as e:
                 print(f"[ERROR] Failed to parse {row['url']}: {e}")
@@ -147,7 +165,9 @@ def extract_metadata(df: DataFrame) -> DataFrame:
 
 @click.command()
 @click.option(
-    "-o", "--output", "outputFP",
+    "-o",
+    "--output",
+    "outputFP",
     help="Path to output SQLite3 database",
     required=False,
     type=click.Path(
@@ -176,4 +196,3 @@ def main(outputFP: Path) -> None:
 
 if __name__ == "__main__":
     main()
-

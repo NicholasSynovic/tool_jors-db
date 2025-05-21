@@ -55,4 +55,3 @@ class DB:
             if_exists="append",
             index=False,
         )
-
